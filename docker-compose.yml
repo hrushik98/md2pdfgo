@@ -1,0 +1,19 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      - ALLOWED_ORIGIN=http://localhost:5173
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      # Inside the compose network the backend is reachable at the service name.
+      - VITE_PROXY_TARGET=http://backend:8080

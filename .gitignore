@@ -1,0 +1,30 @@
+# Go
+*.o
+*.a
+*.so
+
+# Binaries
+/backend/md2pdf
+/backend/server
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
