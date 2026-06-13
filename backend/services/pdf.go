@@ -9,10 +9,20 @@ import (
 	"md2pdf/backend/config"
 )
 
+// pageSizeFlag maps an API page-size value to the wkhtmltopdf --page-size flag.
+func pageSizeFlag(pageSize string) string {
+	switch pageSize {
+	case "letter", "Letter":
+		return "Letter"
+	default:
+		return "A4"
+	}
+}
+
 // ConvertHTMLToPDF renders a full HTML document to PDF bytes by shelling out to
 // wkhtmltopdf. The HTML is written to a temporary file, wkhtmltopdf writes the
 // result to a second temporary file, and both are cleaned up before returning.
-func ConvertHTMLToPDF(htmlContent string) ([]byte, error) {
+func ConvertHTMLToPDF(htmlContent, pageSize string) ([]byte, error) {
 	cfg := config.Load()
 
 	// Temp file for the input HTML.
@@ -42,7 +52,7 @@ func ConvertHTMLToPDF(htmlContent string) ([]byte, error) {
 
 	cmd := exec.Command(
 		cfg.WkhtmltopdfPath,
-		"--page-size", "A4",
+		"--page-size", pageSizeFlag(pageSize),
 		"--margin-top", "15mm",
 		"--margin-bottom", "15mm",
 		"--margin-left", "15mm",

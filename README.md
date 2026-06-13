@@ -1,13 +1,23 @@
-# md2pdf
+# md2pdf — Foliate
 
-A full-stack **Markdown → PDF** converter. Write Markdown in a live editor,
-preview it in real time, and download a clean, print-ready PDF with one click.
+A full-stack **Markdown → PDF** converter with a warm, editorial interface
+("Foliate"). Write Markdown, watch a live preview on a cream "paper" sheet, and
+download a clean, print-ready PDF that matches what you see.
 
 - **Backend:** Go — [goldmark](https://github.com/yuin/goldmark) renders
-  Markdown to styled HTML, and [wkhtmltopdf](https://wkhtmltopdf.org/) turns that
-  HTML into a PDF.
-- **Frontend:** React + Vite — a split-pane editor/preview with
-  `react-markdown` and syntax-highlighted code blocks.
+  Markdown to styled HTML (a custom warm syntax theme via
+  [chroma](https://github.com/alecthomas/chroma)), and
+  [wkhtmltopdf](https://wkhtmltopdf.org/) turns that HTML into a PDF.
+- **Frontend:** React + Vite — a fully responsive, tabbed **Write / Preview**
+  UI (`marked` + `DOMPurify` + `highlight.js`) with:
+  - a formatting **toolbar** (headings, bold/italic/strike/code, lists, task
+    lists, quote, code block, link, image, table, divider) plus ⌘B / ⌘I / ⌘K
+  - **light / dark** theme toggle
+  - a custom **document title** (becomes the PDF header and filename)
+  - document **style presets** (GitHub / Editorial / Academic / Minimal)
+  - **page size** options (A4 / Letter)
+  - live **word / character count** and reading time
+  - a responsive layout that adapts from desktop down to mobile
 
 ## Project structure
 
@@ -20,18 +30,20 @@ md2pdf/
 │   ├── config/config.go     # env-based configuration
 │   ├── handlers/convert.go  # POST /convert -> streams a PDF
 │   └── services/
-│       ├── markdown.go      # Markdown -> styled HTML (goldmark)
+│       ├── markdown.go      # Markdown -> styled HTML (goldmark + chroma)
 │       └── pdf.go           # HTML -> PDF (wkhtmltopdf)
 ├── frontend/
-│   ├── index.html
+│   ├── index.html           # loads Newsreader + IBM Plex fonts
 │   ├── vite.config.js       # /api proxy -> backend
 │   ├── package.json
 │   ├── Dockerfile
 │   └── src/
 │       ├── main.jsx
-│       ├── App.jsx
+│       ├── App.jsx          # Foliate shell: header, tabs, controls
+│       ├── index.css        # theme variables + .md-doc styling
 │       ├── api/convert.js
-│       └── components/{Editor,Preview,ConvertButton}.jsx
+│       ├── lib/markdown.js  # marked + DOMPurify render
+│       └── components/{Editor,Preview,ConvertButton,icons}.jsx
 ├── docker-compose.yml
 └── README.md
 ```
@@ -59,8 +71,18 @@ go run .
 
 The API listens on <http://localhost:8080> with:
 
-- `POST /convert` — body `{ "markdown": "..." }`, responds with
-  `application/pdf` bytes (or a JSON `{ "error": "..." }` on failure)
+- `POST /convert` — JSON body, responds with `application/pdf` bytes (or a JSON
+  `{ "error": "..." }` on failure):
+
+  ```json
+  {
+    "markdown": "# Hello",           // required
+    "title": "My Document",          // optional — becomes the PDF header + filename
+    "preset": "github",              // optional — github | editorial | academic | minimal
+    "pageSize": "a4"                 // optional — a4 | letter
+  }
+  ```
+
 - `GET /health` — `{ "status": "ok" }`
 
 ### Frontend
@@ -96,11 +118,19 @@ docker-compose up --build
 
 ## How it works
 
-1. The browser sends the editor's Markdown to `POST /api/convert`, which Vite
-   proxies to the backend's `/convert`.
-2. `services.ConvertMarkdownToHTML` renders the Markdown to a full, styled HTML
-   document (GFM, footnotes, syntax highlighting).
-3. `services.ConvertHTMLToPDF` writes the HTML to a temp file and shells out to
-   `wkhtmltopdf` to produce the PDF.
-4. The handler streams the PDF back with a `Content-Disposition` attachment
-   header, and the frontend triggers a download of `document.pdf`.
+1. The browser renders a **live preview** locally (`marked` → `DOMPurify` →
+   `highlight.js`) styled to match the final PDF.
+2. On **Download PDF**, the editor's Markdown plus the chosen title, preset, and
+   page size are sent to `POST /api/convert`, which Vite proxies to the
+   backend's `/convert`.
+3. `services.ConvertMarkdownToHTML` renders the Markdown to a full, styled HTML
+   document (GFM, footnotes, a warm chroma syntax theme, the document header,
+   and the selected preset).
+4. `services.ConvertHTMLToPDF` writes the HTML to a temp file and shells out to
+   `wkhtmltopdf` (with the selected page size) to produce the PDF.
+5. The handler streams the PDF back with a `Content-Disposition` attachment
+   header named after the document title, and the frontend triggers the
+   download.
+
+> **Note:** the preview and the PDF share the same `.md-doc` styling and warm
+> syntax palette, so the downloaded PDF looks like what you see on screen.

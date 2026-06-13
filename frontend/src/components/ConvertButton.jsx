@@ -1,30 +1,18 @@
-import { useState } from 'react'
+import { DownloadIcon, SpinnerIcon } from './icons'
 
-// ConvertButton triggers the PDF conversion. It shows a loading label and is
-// disabled while a conversion is in flight.
+// ConvertButton triggers the backend PDF export. It shows a spinner and a
+// "Preparing…" label while the request is in flight.
 export default function ConvertButton({ onClick, loading }) {
-  const [hovered, setHovered] = useState(false)
-
-  const background = loading ? '#1e3a8a' : hovered ? '#1d4ed8' : '#2563eb'
-
   return (
     <button
+      type="button"
+      className="fl-download-btn"
       onClick={onClick}
       disabled={loading}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background,
-        color: '#ffffff',
-        border: 'none',
-        borderRadius: '6px',
-        padding: '10px 20px',
-        fontSize: '15px',
-        cursor: loading ? 'not-allowed' : 'pointer',
-        transition: 'background 0.15s ease',
-      }}
+      title="Download as PDF"
     >
-      {loading ? 'Converting...' : 'Convert to PDF'}
+      {loading ? <SpinnerIcon /> : <DownloadIcon />}
+      <span>{loading ? 'Preparing…' : 'Download PDF'}</span>
     </button>
   )
 }
