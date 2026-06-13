@@ -14,7 +14,7 @@ const PRESET_LABELS = {
 }
 
 const SAMPLE_MARKDOWN = [
-  'A quick tour of everything **Foliate** can turn into a polished PDF. The title above becomes your document header — edit anything on the left, then switch to **Preview** or hit **Download PDF**.',
+  'A quick tour of everything **md2pdf** can turn into a polished PDF. The title above becomes your document header — edit anything on the left, then switch to **Preview** or hit **Download PDF**.',
   '',
   '> "Write once in Markdown — export anywhere." Use the toolbar above, or paste your own document over this one.',
   '',
@@ -97,9 +97,9 @@ function App() {
     <div className="fl-app" data-theme={theme}>
       <header className="fl-header">
         <div className="fl-brand">
-          <div className="fl-logo">F</div>
+          <div className="fl-logo">M</div>
           <div className="fl-brand-text">
-            <span className="fl-brand-name">Foliate</span>
+            <span className="fl-brand-name">md2pdf</span>
             <span className="fl-brand-sub">Markdown → PDF</span>
           </div>
         </div>
